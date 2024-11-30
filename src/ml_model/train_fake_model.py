@@ -70,7 +70,6 @@ model = CatBoostClassifier(
 )
 model.fit(X, y)
 
-
 model.save_model('src/ml_model/trained_models/model_stub.cbm')
 
 print("Model successfully trained and saved as 'model_stub.cbm'.")

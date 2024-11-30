@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  ml_service:
+    build: .
+    container_name: ml_service
+    ports:
+      - "8000:80"  # Пробрасываем порт 80 контейнера на 8000 хоста (можете изменить при необходимости)
+    networks:
+      - app_network
+
+  back_java:
+    image: back_java2
+    container_name: back_java_service
+    ports:
+      - "8080:8080"
+    networks:
+      - app_network
+    depends_on:
+      - ml_service
+
+networks:
+  app_network:
+    driver: bridge

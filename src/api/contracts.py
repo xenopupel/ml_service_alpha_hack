@@ -22,4 +22,4 @@ class InputData(BaseModel):
     claims: int  # Наличие обращений в банк
 
 class OutputData(BaseModel):
-    model_output: Literal["PayControl", "QDSToken", "QDSMobile"]
+    recommendedMethod: Literal["PayControl", "QDSToken", "QDSMobile"]

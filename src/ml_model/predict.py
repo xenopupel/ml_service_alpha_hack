@@ -1,33 +1,58 @@
 import pandas as pd
 from catboost import CatBoostClassifier
+from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
+import numpy as np
 
 class ModelPredictor:
     def __init__(self, model_path: str):
         self.model = CatBoostClassifier()
         self.model.load_model(model_path)
-        print(f"Модель загружена из {model_path}")
-    
-    def predict(self, data: pd.DataFrame) -> pd.Series:
-        predictions = self.model.predict(data)
-        return pd.Series(predictions)
+        self.label_encoders = self._initialize_label_encoders()
+        self.mlb = self._initialize_mlb()
 
+    def _initialize_label_encoders(self):
+        label_encoders = {}
+        label_encoders['segment'] = LabelEncoder()
+        label_encoders['segment'].fit(["Малый бизнес", "Средний бизнес", "Крупный бизнес"])
+        label_encoders['role'] = LabelEncoder()
+        label_encoders['role'].fit(['ЕИО', 'Сотрудник'])
+        label_encoders['currentMethod'] = LabelEncoder()
+        label_encoders['currentMethod'].fit(["SMS", "PayControl", "QDSToken", "QDSMobile"])
+        label_encoders['model_output'] = LabelEncoder()
+        label_encoders['model_output'].fit(['PayControl', 'QDSMobile', 'QDSToken'])
+        return label_encoders
 
-if __name__ == "__main__":
-    predictor = ModelPredictor('src/ml_model/trained_models/model_stub.cbm')
+    def _initialize_mlb(self):
+        mlb = MultiLabelBinarizer(classes=["SMS", "PayControl", "QDSToken", "QDSMobile"])
+        mlb.fit([['SMS'], ['PayControl'], ['QDSToken'], ['QDSMobile']])
+        return mlb
 
-    # Пример данных
-    example_data = pd.DataFrame({
-        'feature_0': [0.5, -1.2],
-        'feature_1': [1.3, 0.7],
-        'feature_2': [-0.8, 0.5],
-        'feature_3': [1.5, -0.2],
-        'feature_4': [0.1, 0.9],
-        'feature_5': [0.4, -0.5],
-        'feature_6': [0.7, -1.1],
-        'feature_7': [1.0, 0.3],
-        'feature_8': [-0.3, 0.8],
-        'feature_9': [0.6, 0.4]
-    })
+    def predict(self, data: dict) -> str:
+        features = self._extract_features(data)
+        data_df = pd.DataFrame([features])
+        prediction = self.model.predict(data_df)
+        prediction_label = self.label_encoders['model_output'].inverse_transform([int(prediction[0])])[0]
+        return prediction_label
 
-    predictions = predictor.predict(example_data)
-    print("Предсказания:", predictions.tolist())
+    def _extract_features(self, data: dict) -> dict:
+        features = {}
+        # Encode 'segment', 'role', 'currentMethod'
+        features['segment'] = self.label_encoders['segment'].transform([data['segment']])[0]
+        features['role'] = self.label_encoders['role'].transform([data['role']])[0]
+        features['currentMethod'] = self.label_encoders['currentMethod'].transform([data['currentMethod']])[0]
+        # Convert 'mobileApp' to int
+        features['mobileApp'] = int(data['mobileApp'])
+        # Flatten 'signatures' fields
+        features['signatures_common_mobile'] = data['signatures']['common']['mobile']
+        features['signatures_common_web'] = data['signatures']['common']['web']
+        features['signatures_special_mobile'] = data['signatures']['special']['mobile']
+        features['signatures_special_web'] = data['signatures']['special']['web']
+        # Numeric fields
+        features['organizations'] = data['organizations']
+        features['claims'] = data['claims']
+        # One-hot encode 'availableMethods'
+        available_methods = data['availableMethods']
+        available_methods_encoded = self.mlb.transform([available_methods])[0]
+        for idx, method in enumerate(self.mlb.classes_):
+            features[method] = available_methods_encoded[idx]
+        return features

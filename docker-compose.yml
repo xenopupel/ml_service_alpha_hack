@@ -10,7 +10,7 @@ services:
       - app_network
 
   back_java:
-    image: back_java2
+    image: back_java_image:latest
     container_name: back_java_service
     ports:
       - "8080:8080"

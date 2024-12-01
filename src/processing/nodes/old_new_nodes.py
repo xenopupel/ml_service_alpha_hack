@@ -1,13 +1,14 @@
 from src.processing.abstracts.tree_classes import Node, Switch
 from src.ml_model.predict import ModelPredictor
+from src.utils.enums import UseCaseType
 from typing import Any, Optional
 
 
 class NewUserNode(Node):
     def do_process(self, data: Any) -> Any:
-        if data['usecase'] == 'base_money':
+        if data['usecase'] == UseCaseType.BASE_OPERATION.value:
             return 'PayControl'
-        elif data['usecase'] == 'big_money':
+        elif data['usecase'] == UseCaseType.BIG_OPERATION.value:
             return 'QDSToken'
 
 

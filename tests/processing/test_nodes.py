@@ -1,20 +1,21 @@
 import pytest
 from src.processing.nodes.old_new_nodes import NewUserNode, PredictionNode
 from src.api.contracts import InputData, Signatures, SignatureCounts
-from src.ml_model.predict import ModelPredictor 
+from src.ml_model.predict import ModelPredictor
+from src.utils.enums import UseCaseType
 
 class TestNewUserNode:
     def test_do_process_base_money(self):
         """Test NewUserNode with 'base_money' usecase."""
         node = NewUserNode()
-        data = {'usecase': 'base_money'}
+        data = {'usecase': UseCaseType.BASE_OPERATION.value}
         result = node.do_process(data)
         assert result == 'PayControl'
 
     def test_do_process_big_money(self):
         """Test NewUserNode with 'big_money' usecase."""
         node = NewUserNode()
-        data = {'usecase': 'big_money'}
+        data = {'usecase': UseCaseType.BIG_OPERATION.value}
         result = node.do_process(data)
         assert result == 'QDSToken'
 

@@ -3,6 +3,7 @@ from src.processing.nodes.usecase import UseCaseSwitch
 from src.processing.nodes.old_new_nodes import OldNewSwitch
 from src.processing.abstracts.tree_classes import Node
 from src.processing.nodes.no_recommended_node import NoRecommendedNode
+from src.utils.enums import UseCaseType
 
 # Define simple test nodes
 class TestNode(Node):
@@ -73,7 +74,7 @@ class TestUseCaseSwitch:
 
     def test_get_next_node_base_money(self):
         """Test UseCaseSwitch with 'base_money' usecase."""
-        data = {'usecase': 'base_money'}
+        data = {'usecase': UseCaseType.BASE_OPERATION.value}
         result = self.switch.get_next_node(data)
         assert result == self.base_money_node
 

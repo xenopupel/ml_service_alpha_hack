@@ -1,6 +1,7 @@
 import pytest
 from src.api.contracts import InputData, Signatures, SignatureCounts
-from src.processing.processing import get_processor  # Adjust the import to your actual module
+from src.processing.processing import get_processor
+from src.utils.enums import UseCaseType
 
 class TestProcessor:
     @pytest.mark.parametrize(
@@ -22,7 +23,7 @@ class TestProcessor:
                     availableMethods=['SMS'],
                     claims=0
                 ).model_dump(),
-                {'is_new': True, 'usecase': 'base_money'}
+                {'is_new': True, 'usecase': UseCaseType.BASE_OPERATION.value}
             ),
             (
                 InputData(

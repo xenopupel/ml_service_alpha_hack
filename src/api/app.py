@@ -28,12 +28,12 @@ async def make_prediction(data: InputData):
 @app.post("/predict-with-context", response_model=OutputData)
 async def make_prediction_with_context(
     data: InputData,
-    is_new: bool,
-    usecase: str
+    isNew: bool,
+    useContext: str
 ):
     try:
         data_dict = data.model_dump()
-        preprocessed_data = preprocess_data(data_dict, is_new=is_new, usecase=usecase)
+        preprocessed_data = preprocess_data(data_dict, is_new=isNew, usecase=useContext)
         prediction = processor.process(preprocessed_data)
         return OutputData(recommendedMethod=prediction)
     except Exception as e:
@@ -42,11 +42,3 @@ async def make_prediction_with_context(
 @app.get("/")
 async def root():
     return {"message": "Сервис предсказаний работает!"}
-
-
-
-
-
-
-
-
